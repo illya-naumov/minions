@@ -37,6 +37,11 @@ Document findings as:
 ### 3. Generate Fix Plan
 
 Once the root cause is confirmed, generate a targeted fix plan:
+- **Fix depth check:** Before proposing a fix, evaluate whether the minimal patch is a **band-aid or a proper solution**. Ask:
+  - Does the root cause exist because code is in the wrong place architecturally?
+  - Would the minimal fix leave a latent design problem that will cause future bugs?
+  - Is there a slightly larger change that fixes the problem *and* improves the codebase?
+  If the answer to any of these is "yes", present the user with both the quick fix and the proper fix as options before proceeding.
 - **Fix description:** What code changes are needed?
 - **Regression tests:** What tests should be added to prevent recurrence?
 - **Rollback strategy:** If the fix breaks something else, how do we revert?
