@@ -17,6 +17,7 @@ Minions gives you the scaffolding to turn a chaotic backlog into an assembly lin
 │   └── task.md                 # Execution task list template
 └── workflows/
     ├── plan-feature.md         # 🍌 End-to-end SDD planning (spec → audit → design → tasks)
+    ├── plan-bugfix.md          # 🍌 Bug fix planning (repro → RCA → fix plan → tasks)
     ├── worker-agent.md         # 🍌 Sprint worker lifecycle
     ├── orchestrate-sprint.md   # 🍌 Multi-agent sprint orchestration
     ├── context-packet.md       # 🍌 Agent assignment template
@@ -32,27 +33,29 @@ README.md                       # You are here
 
 ## The SDD Lifecycle
 
-Every feature goes through four phases before code ships:
+Every feature or bug fix goes through four phases before code ships:
 
 ```mermaid
 flowchart TD
-    A[🍌 Raw Feature Idea] --> B{"[/plan-feature]"}
-    B -->|Step 1: Build| C[spec.md]
-    C -->|Step 2: Audit| D[Bulletproofed Spec]
-    D -->|Step 3: Plan| E[design.md + task.md]
-    E --> F[Publish to GitHub Issue]
-    F --> G["Label: Agent-Ready 🏷️"]
-    G --> H{"[/orchestrate-sprint]"}
-    H --> I["Worker-A 🍌"]
-    H --> J["Worker-B 🍌"]
-    H --> K["Worker-C 🍌"]
-    I & J & K --> L[PRs → Merge → Ship]
+    A[🍌 Raw Idea] --> B{Feature or Bug?}
+    B -->|Feature| C["[/plan-feature]"]
+    B -->|Bug| D["[/plan-bugfix]"]
+    C -->|Build + Audit| E[spec.md + design.md + task.md]
+    D -->|Report + RCA + Fix Plan| F[Bug Report + Fix Plan]
+    E & F --> G[Publish to GitHub Issue]
+    G --> H["Label: Agent-Ready 🏷️"]
+    H --> I{"[/orchestrate-sprint]"}
+    I --> J["Worker-A 🍌"]
+    I --> K["Worker-B 🍌"]
+    I --> L["Worker-C 🍌"]
+    J & K & L --> M[PRs → Merge → Ship]
+    M --> N["🔄 Retrospective"]
 ```
 
 1. **Spec & Audit** — Define what success looks like. Audit for contradictions, missing guards, and incomplete journeys.
 2. **Plan** — Generate a technical design and atomic task list. No code until approved.
 3. **Execute** — Worker agents pick up `Agent-Ready` issues and implement in isolated `git worktree` branches.
-4. **Reconcile** — Drift detection ensures code matches the spec. Artifacts are updated before PR.
+4. **Reconcile & Retrospective** — Drift detection ensures code matches the spec. After completion, workflows self-analyze and propose improvements.
 
 ## Quick Start
 
@@ -117,10 +120,14 @@ Maintainability and clarity over clever, hyper-optimized code.
 - Follow the defined workflows in `.agent/workflows/`.
 ```
 
-### 4. Start planning features
+### 4. Start planning
 
 ```
+# Plan a new feature
 /plan-feature — I want to add user authentication with OAuth2
+
+# Plan a bug fix
+/plan-bugfix — Users are seeing a 500 error when submitting the contact form
 ```
 
 ### 5. Run a sprint
@@ -134,6 +141,7 @@ Maintainability and clarity over clever, hyper-optimized code.
 | Workflow | Slash Command | Purpose |
 |----------|---------------|---------|
 | **Plan Feature** | `/plan-feature` | Full SDD pipeline: spec → audit → design → tasks → stage issue |
+| **Plan Bug Fix** | `/plan-bugfix` | Bug fix pipeline: repro → root cause → fix plan → stage issue |
 | **Worker Agent** | `/worker-agent` | Bootstrap a sprint worker to execute assigned issues |
 | **Orchestrate Sprint** | `/orchestrate-sprint` | Provision workers, assign issues, monitor progress, merge PRs |
 | **Context Packet** | `/context-packet` | Template for agent assignment with scope/deps/contracts |
@@ -144,6 +152,16 @@ Maintainability and clarity over clever, hyper-optimized code.
 | **Unit Test** | `/unit-test` | Generate tests adapting to your framework |
 | **Workflow Creator** | `/workflow-creator` | Create new workflows following the stack-agnostic pattern |
 
+## Self-Improving Workflows
+
+All core workflows (`/plan-feature`, `/plan-bugfix`, `/worker-agent`, `/orchestrate-sprint`) include a mandatory **Retrospective** step. After every run, the agent:
+
+1. **Analyzes** the execution for command failures, missing steps, ambiguous instructions, and workflow gaps.
+2. **Generates** a structured report with proposed `diff` edits to the workflow file.
+3. **Surfaces** recommendations to the user — no changes applied without explicit approval.
+
+This creates a feedback loop where your workflows get smarter with every sprint.
+
 ## How Multi-Agent Sprints Work
 
 ```mermaid
@@ -153,7 +171,7 @@ sequenceDiagram
     participant O as 👑 Orchestrator
     participant W as 🍌🍌🍌 Workers
 
-    U->>P: /plan-feature
+    U->>P: /plan-feature or /plan-bugfix
     P->>P: Build Spec → Audit → Design → Tasks
     P->>U: Post SDD to GitHub Issue (Agent-Ready)
     U->>O: /orchestrate-sprint
@@ -162,7 +180,8 @@ sequenceDiagram
     U->>W: /worker-agent — I am Worker-A
     W->>W: Create worktree → Execute task.md → Verify
     W->>W: Reconcile drift → Push → PR
-    O->>O: Quality gate → Merge → Close issue
+    O->>O: Quality gate → Merge → Deploy gate → Close issue
+    O->>U: 🔄 Sprint Retrospective
 ```
 
 **Key principle:** No two workers ever touch the same domain at the same time. Conflicts are structurally impossible.
@@ -196,11 +215,11 @@ Browse community skills at [VoltAgent/awesome-agent-skills](https://github.com/V
 
 ## Philosophy
 
-This framework is built on a simple belief: **AI agents are only as good as the specifications they're given.** 
+This framework is built on a simple belief: **AI agents are only as good as the specifications they're given.**
 
 Without structure, agents hallucinate architecture, skip edge cases, and create merge nightmares. With SDD, they become reliable software engineers that follow a defined contract.
 
-Minions enforces the human-in-the-loop at the right moment — *before* code is written — so that execution is fast, correct, and conflict-free.
+Minions enforces the human-in-the-loop at the right moment — *before* code is written — so that execution is fast, correct, and conflict-free. And with self-improving workflows, the system gets better with every sprint.
 
 ## License
 

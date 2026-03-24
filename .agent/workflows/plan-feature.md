@@ -45,3 +45,57 @@ Once the user approves the technical design and tasks, formally package it:
 3. Mark the issue as **"Agent-Ready"**.
 
 The feature is fully planned! The Lead Orchestrator will assign this issue to a worker agent via `[/orchestrate-sprint]`.
+
+### 5. Retrospective (Self-Improvement)
+
+After the feature issue is staged, analyze this workflow run and propose improvements. This step is mandatory.
+
+#### a) Analyze the Run
+
+| Category | What to Look For |
+|---|---|
+| **Spec audit quality** | Did the audit catch real gaps, or was it mostly noise? Were critical issues missed? |
+| **Template usefulness** | Did `.agent/templates/` have what was needed, or were templates outdated/missing? |
+| **User iteration count** | How many review cycles were needed? Could the workflow have asked better upfront questions? |
+| **Command failures** | Did any CLI commands (GitHub issue creation, label management) fail or need adaptation? |
+| **Ambiguous steps** | Were any steps unclear about expected depth (e.g., how detailed should `design.md` be)? |
+| **Redundant steps** | Were any steps unnecessary or could be combined for efficiency? |
+
+#### b) Generate Retrospective Report
+
+```markdown
+## 🔄 Workflow Retrospective — Feature Planning
+
+### Run Summary
+- **Feature:** #<issue> — <title>
+- **Spec review cycles:** <count>
+- **Design review cycles:** <count>
+
+### Issues Encountered
+| # | Category | Severity | Description |
+|---|----------|----------|-------------|
+| 1 | <category> | 🔴/🟡/🟢 | <what happened> |
+
+### Proposed Workflow Edits
+> ⚠️ These edits require user approval before applying.
+
+#### Proposal 1: <title>
+**File:** `.agent/workflows/plan-feature.md`
+**Reason:** <why this change would help>
+```diff
+-<old line>
++<new line>
+```
+
+### No Issues Found
+<If nothing went wrong, state: "No issues encountered. Workflow performed as documented.">
+```
+
+#### c) Present to User
+
+Surface the retrospective report to the user via `notify_user` with `BlockedOnUser: true`. Include the workflow file in `PathsToReview` **only if** you have proposed edits.
+
+**Rules:**
+- You MUST NOT auto-edit any workflow `.md` file. All changes require explicit user approval.
+- Proposals should be minimal and targeted — do not rewrite entire sections.
+- If no issues were found, still report the clean run but set `BlockedOnUser: false`.

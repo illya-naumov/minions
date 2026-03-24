@@ -99,4 +99,65 @@ gh issue comment <ISSUE_NUMBER> --repo <OWNER>/<REPO> --body "📋 **PR #<PR> su
 
 ## 10. Next Issue in Queue
 
-After completing an issue, move to the next issue assigned to your `Worker-ID` in the Project board. Repeat the cycle.
+After completing an issue, move to the next issue assigned to your `Worker-ID` in the Project board. Repeat the cycle from Step 1.
+
+Once your full queue is empty, proceed to Step 11.
+
+## 11. Retrospective (Self-Improvement)
+
+After completing your **entire queue**, analyze this workflow run and propose improvements. This step is mandatory — do not skip it even if everything went smoothly.
+
+### a) Analyze the Run
+
+Review your execution and categorize issues into this table:
+
+| Category | What to Look For |
+|---|---|
+| **Command failures** | Any CLI command that errored, wasn't available, or needed different flags for this OS/shell |
+| **Missing steps** | Prerequisites you had to figure out that weren't documented (e.g., `npm install` before build) |
+| **Ambiguous instructions** | Steps where you had to guess intent, made wrong assumptions, or wasted effort |
+| **Context packet gaps** | Information missing from the context packet that you needed (API contracts, file paths, constraints) |
+| **Domain violations** | Files you were tempted to edit outside your permitted domain, or files you edited that you shouldn't have |
+| **Encoding / platform issues** | PowerShell quirks, path format problems, line ending mismatches, UTF-8 issues |
+| **Workflow gaps** | Situations that arose (e.g., merge conflicts, CI failures, missing deps) that the workflow didn't cover |
+
+### b) Generate Retrospective Report
+
+Produce a structured report:
+
+```markdown
+## 🔄 Workflow Retrospective — Agent-<N>
+
+### Run Summary
+- **Issues completed:** #<list>
+- **Duration:** ~<time>
+- **Overall result:** <success / partial / blocked>
+
+### Issues Encountered
+| # | Category | Severity | Description |
+|---|----------|----------|-------------|
+| 1 | <category> | 🔴/🟡/🟢 | <what happened> |
+
+### Proposed Workflow Edits
+> ⚠️ These edits require user approval before applying.
+
+#### Proposal 1: <title>
+**File:** `.agent/workflows/worker-agent.md`
+**Reason:** <why this change would help>
+```diff
+-<old line>
++<new line>
+```
+
+### No Issues Found
+<If nothing went wrong, state: "No issues encountered. Workflow performed as documented.">
+```
+
+### c) Present to User
+
+Surface the retrospective report to the user via `notify_user` with `BlockedOnUser: true`. Include the workflow file in `PathsToReview` **only if** you have proposed edits.
+
+**Rules:**
+- You MUST NOT auto-edit any workflow `.md` file. All changes require explicit user approval.
+- Proposals should be minimal and targeted — do not rewrite entire sections.
+- If no issues were found, still report the clean run (valuable signal) but set `BlockedOnUser: false`.
